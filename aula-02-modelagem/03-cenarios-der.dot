@@ -1,0 +1,74 @@
+// Aula 02 - Modelagem de Dados (2026-03-02)
+// Atividade (p.82): "Elabore um diagrama (DER) contendo atributos simples,
+// determinante, composto e multivalorado para cada cenario abaixo"
+//
+// Os 6 cenarios sao do slide; os atributos foram escolhidos aqui para
+// cobrir os 4 tipos pedidos:
+//   simples       -> nome, nascimento
+//   determinante  -> codigo / cpf / isbn (identifica a entidade)
+//   composto      -> endereco (rua, bairro, cidade)
+//   multivalorado -> telefone[]
+
+digraph DER {
+  graph [splines=curved, nodesep=0.7, ranksep=1.0, bgcolor=white,
+         fontname="Helvetica", pad=0.25, outputorder=edgesfirst, compound=true];
+  node  [shape=record, style="filled,rounded", fillcolor="#fbfbfb",
+         color="#4a6fa5", fontname="Helvetica", fontsize=10, penwidth=1.2];
+  edge  [fontname="Helvetica", fontsize=9, color="#4a6fa5", penwidth=1.2, arrowsize=0.7];
+
+  // 1 - universidade / estudante
+  subgraph cluster_c1 {
+    label="1 - universidade e estudante";
+    fontname="Helvetica"; fontsize=11; color="#888888"; style=dashed;
+    uni [label="{universidade|«PK» codigo : integer\l nome : varchar(60)\l endereco (composto) : rua, bairro, cidade\l telefone[] : varchar(20)\l}"];
+    est [label="{estudante|«PK» cpf : varchar(11)\l nome : varchar(60)\l data_nascimento : date\l}"];
+    uni -> est [xlabel="N", dir=none, taillabel="", labeldistance=2];
+  }
+
+  // 2 - aeronave / passageiro
+  subgraph cluster_c2 {
+    label="2 - aeronave e passageiro";
+    fontname="Helvetica"; fontsize=11; color="#888888"; style=dashed;
+    aero [label="{aeronave|«PK» numero : varchar(10)\l modelo : varchar(30)\l}"];
+    pass [label="{passageiro|«PK» cpf : varchar(11)\l nome : varchar(60)\l telefone[] : varchar(20)\l}"];
+    aero -> pass [xlabel="N", dir=none];
+  }
+
+  // 3 - nacao / estado / cidade
+  subgraph cluster_c3 {
+    label="3 - nacao, estado e cidade";
+    fontname="Helvetica"; fontsize=11; color="#888888"; style=dashed;
+    nacao [label="{nacao|«PK» codigo : integer\l nome : varchar(60)\l}"];
+    estado [label="{estado|«PK» codigo : integer\l nome : varchar(60)\l sigla : char(2)\l}"];
+    cidade [label="{cidade|«PK» codigo : integer\l nome : varchar(60)\l endereco (composto) : rua, bairro\l}"];
+    nacao -> estado [xlabel="N", dir=none];
+    estado -> cidade [xlabel="N", dir=none];
+  }
+
+  // 4 - evento esportivo / competidor (N:N)
+  subgraph cluster_c4 {
+    label="4 - evento esportivo e competidor";
+    fontname="Helvetica"; fontsize=11; color="#888888"; style=dashed;
+    evento [label="{evento_esportivo|«PK» codigo : integer\l nome : varchar(60)\l data : date\l}"];
+    comp [label="{competidor|«PK» cpf : varchar(11)\l nome : varchar(60)\l data_nascimento : date\l}"];
+    evento -> comp [xlabel="N", dir=none];
+  }
+
+  // 5 - paciente / medico (N:N)
+  subgraph cluster_c5 {
+    label="5 - paciente e medico";
+    fontname="Helvetica"; fontsize=11; color="#888888"; style=dashed;
+    pac [label="{paciente|«PK» cpf : varchar(11)\l nome : varchar(60)\l endereco (composto) : rua, bairro, cidade\l}"];
+    med [label="{medico|«PK» crm : varchar(10)\l nome : varchar(60)\l telefone[] : varchar(20)\l}"];
+    pac -> med [xlabel="N", dir=none];
+  }
+
+  // 6 - aluno / disciplina (N:N)
+  subgraph cluster_c6 {
+    label="6 - aluno e disciplina";
+    fontname="Helvetica"; fontsize=11; color="#888888"; style=dashed;
+    aluno [label="{aluno|«PK» matricula : integer\l nome : varchar(60)\l}"];
+    disc [label="{disciplina|«PK» codigo : integer\l nome : varchar(60)\l carga_horaria : integer\l}"];
+    aluno -> disc [xlabel="N", dir=none];
+  }
+}

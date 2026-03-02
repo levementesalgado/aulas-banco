@@ -1,0 +1,13 @@
+// Aula 02 - Modelagem de Dados (2026-03-02)
+// Exemplo do slide: entidade Cliente com 4 atributos.
+// CPF e atributo determinante (identifica o cliente).
+
+digraph DER {
+  graph [splines=curved, nodesep=0.6, ranksep=0.85, bgcolor=white,
+         fontname="Helvetica", pad=0.25, outputorder=edgesfirst];
+  node  [shape=record, style="filled,rounded", fillcolor="#fbfbfb",
+         color="#4a6fa5", fontname="Helvetica", fontsize=11, penwidth=1.2];
+  edge  [fontname="Helvetica", fontsize=10, color="#4a6fa5", penwidth=1.2, arrowsize=0.8];
+
+  cliente [label="{cliente|«PK» cpf : varchar(11)\l nome : varchar(60)\l data_nascimento : date\l rg : varchar(20)\l}"];
+}
