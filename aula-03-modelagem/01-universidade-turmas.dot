@@ -1,0 +1,30 @@
+// Aula 03 - Modelagem de Dados (2026-03-09)
+// Atividade (p.50): "Uma Universidade tem varias turmas. Uma turma tem varios
+// professores, sendo que um professor pode ministrar aulas em mais de uma turma.
+// Uma turma tem sempre aulas em apenas uma sala, mas uma sala pode estar
+// associada a varias turmas (com horarios diferentes)."
+//
+//   Listar entidades / 2 atributos para cada (identificando a chave primaria)
+//   Listar os relacionamentos / listar as chaves estrangeiras / criar o MER
+
+digraph DER {
+  graph [splines=curved, nodesep=0.7, ranksep=1.0, bgcolor=white,
+         fontname="Helvetica", pad=0.25, outputorder=edgesfirst];
+  node  [shape=record, style="filled,rounded", fillcolor="#fbfbfb",
+         color="#4a6fa5", fontname="Helvetica", fontsize=11, penwidth=1.2];
+  edge  [fontname="Helvetica", fontsize=10, color="#4a6fa5", penwidth=1.2, arrowsize=0.8];
+
+  universidade [label="{universidade|«PK» codigo : integer\l nome : varchar(60)\l}"];
+  turma        [label="{turma|«PK» codigo : integer\l descricao : varchar(60)\l «FK» numero_sala : integer\l}"];
+  professor    [label="{professor|«PK» matricula : integer\l nome : varchar(60)\l}"];
+  sala         [label="{sala|«PK» numero : integer\l capacidade : integer\l}"];
+
+  // universidade tem varias turmas
+  universidade -> turma [xlabel="N", dir=none];
+
+  // turma tem varios professores / professor pode ministrar em mais de uma turma
+  turma -> professor [xlabel="N", dir=none];
+
+  // turma tem aulas em apenas uma sala / sala recebe varias turmas
+  sala -> turma [xlabel="1", dir=none];
+}
