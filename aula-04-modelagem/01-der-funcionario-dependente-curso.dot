@@ -1,0 +1,36 @@
+// Aula 04 - Modelagem de Dados (2026-03-16)
+// Atividade "Construir o DER" (p.34) - atributos e regras literais do slide:
+//
+//   Atributos: MATRICULA DO FUNCIONARIO; NOME DO FUNCIONARIO; DATA DO
+//   NASCIMENTO; DEPENDENTE; CODIGO DO DEPENDENTE; NOME DO DEPENDENTE; CURSO;
+//   CODIGO DO CURSO; NOME DO CURSO; ANO DO CURSO
+//
+//   Regras do negocio:
+//   - Um funcionario pode ter mais de um dependente
+//   - Um dependente so pode estar associado a um funcionario
+//   - Um funcionario pode fazer mais de um curso
+//   - Um curso pode ser feito por mais de um funcionario
+//
+// Dependente (1,N) vira entidade; curso x funcionario e N:N, entao vira
+// entidade associativa funcionario_curso.
+
+digraph DER {
+  graph [splines=curved, nodesep=0.8, ranksep=1.0, bgcolor=white,
+         fontname="Helvetica", pad=0.25, outputorder=edgesfirst];
+  node  [shape=record, style="filled,rounded", fillcolor="#fbfbfb",
+         color="#4a6fa5", fontname="Helvetica", fontsize=11, penwidth=1.2];
+  edge  [fontname="Helvetica", fontsize=10, color="#4a6fa5", penwidth=1.2, arrowsize=0.8];
+
+  funcionario [label="{funcionario|«PK» matricula : integer\l nome : varchar(60)\l data_nascimento : date\l}"];
+  dependente  [label="{dependente|«PK» codigo : integer\l nome : varchar(60)\l «FK» matricula : integer\l}"];
+  curso       [label="{curso|«PK» codigo : integer\l nome : varchar(60)\l ano : integer\l}"];
+  faz_curso   [label="{funcionario_curso|«FK» matricula : integer\l «FK» codigo : integer\l}"];
+
+  // um funcionario pode ter mais de um dependente; um dependente so pertence
+  // a um funcionario  -> 1:N
+  funcionario -> dependente [xlabel="1", dir=none];
+
+  // funcionario x curso  ->  N:N (entidade associativa)
+  funcionario -> faz_curso [xlabel="1", dir=none];
+  curso -> faz_curso [xlabel="1", dir=none];
+}

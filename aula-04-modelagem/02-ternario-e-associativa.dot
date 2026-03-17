@@ -1,0 +1,37 @@
+// Aula 04 - Modelagem de Dados (2026-03-16)
+// Relacionamento ternario (p.43) e entidade associativa (p.41):
+//
+//   Ternario: Cidade - Distribuidor - Produto, relacao "distribuicao",
+//             cardinalidades (1,1) (1,N) (1,N)
+//   Entidade Consulta: fruto de uma relacao n.n
+
+digraph DER {
+  graph [splines=curved, nodesep=0.7, ranksep=1.0, bgcolor=white,
+         fontname="Helvetica", pad=0.25, outputorder=edgesfirst];
+  node  [shape=record, style="filled,rounded", fillcolor="#fbfbfb",
+         color="#4a6fa5", fontname="Helvetica", fontsize=11, penwidth=1.2];
+  edge  [fontname="Helvetica", fontsize=10, color="#4a6fa5", penwidth=1.2, arrowsize=0.8];
+
+  subgraph cluster_ternario {
+    label="relacionamento ternario";
+    fontname="Helvetica"; fontsize=11; color="#888888"; style=dashed;
+    cidade      [label="{cidade|«PK» codigo : integer\l nome : varchar(60)\l}"];
+    distribuidor [label="{distribuidor|«PK» cnpj : varchar(14)\l nome : varchar(60)\l}"];
+    produto     [label="{produto|«PK» codigo : integer\l nome : varchar(60)\l}"];
+    distribuicao [label=distribuicao, shape=diamond, fillcolor="#eef2f8",
+                  height=0.5, width=1.6];
+    cidade -> distribuicao [xlabel="1.1", dir=none];
+    distribuidor -> distribuicao [xlabel="1.N", dir=none];
+    produto -> distribuicao [xlabel="1.N", dir=none];
+  }
+
+  subgraph cluster_nn {
+    label="relacao n.n vira entidade associativa";
+    fontname="Helvetica"; fontsize=11; color="#888888"; style=dashed;
+    medico    [label="{medico|«PK» crm : varchar(10)\l nome : varchar(60)\l}"];
+    paciente  [label="{paciente|«PK» cpf : varchar(11)\l nome : varchar(60)\l}"];
+    consulta  [label="{consulta|«PK» codigo : integer\l data : date\l «FK» crm : varchar(10)\l «FK» cpf : varchar(11)\l}"];
+    medico -> consulta [xlabel="1", dir=none];
+    paciente -> consulta [xlabel="1", dir=none];
+  }
+}
