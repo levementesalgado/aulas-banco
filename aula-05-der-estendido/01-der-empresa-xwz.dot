@@ -1,0 +1,42 @@
+// Aula 05 - DER Estendido (2026-03-30)
+// Exercicio "Empresa XWZ" (p.21) - enunciado literal do slide:
+//
+//   "Na Empresa XWZ, um funcionario trabalha no maximo em um setor, mas no
+//   setor podem trabalhar muitos funcionarios. Para cada funcionario devera
+//   ser armazenado o Nome, sexo, salario e CPF. Para o setor deve ser
+//   armazenado o numero, localizacao e nome. E importante indicar que
+//   obrigatoriamente um funcionario possui um Gerente e o Gerente ira
+//   comandar diversos funcionarios. Ainda, um funcionario pode participar de
+//   diversos projetos e um projeto pode ter diversos funcionarios
+//   participando. Cada projeto devera possuir um numero, localizacao e nome.
+//   Ainda, cada funcionario pode possuir diversos dependentes, mas o
+//   dependente e associado a um funcionario. O dependente possui os
+//   seguintes atributos: Nome, sexo, Data de aniversario e parentesco."
+
+digraph DER {
+  graph [splines=curved, nodesep=0.8, ranksep=1.1, bgcolor=white,
+         fontname="Helvetica", pad=0.25, outputorder=edgesfirst];
+  node  [shape=record, style="filled,rounded", fillcolor="#fbfbfb",
+         color="#4a6fa5", fontname="Helvetica", fontsize=11, penwidth=1.2];
+  edge  [fontname="Helvetica", fontsize=10, color="#4a6fa5", penwidth=1.2, arrowsize=0.8];
+
+  setor [label="{setor|«PK» numero : integer\l nome : varchar(60)\l localizacao : varchar(60)\l}"];
+  funcionario [label="{funcionario|«PK» cpf : varchar(11)\l nome : varchar(60)\l sexo : char(1)\l salario : numeric\l}"];
+  projeto [label="{projeto|«PK» numero : integer\l nome : varchar(60)\l localizacao : varchar(60)\l}"];
+  dependente [label="{dependente|«PK» nome : varchar(60)\l sexo : char(1)\l data_aniversario : date\l parentesco : varchar(30)\l «FK» cpf : varchar(11)\l}"];
+  participa [label="{funcionario_projeto|«FK» cpf : varchar(11)\l «FK» numero : integer\l}"];
+
+  // funcionario trabalha no maximo em um setor; setor tem muitos -> 1:N
+  setor -> funcionario [xlabel="1", dir=none];
+
+  // um funcionario possui um gerente; o gerente comanda diversos
+  // (relacionamento unario no proprio funcionario)
+  funcionario -> funcionario [xlabel="1", dir=back];
+
+  // funcionario x projeto -> N:N
+  funcionario -> participa [xlabel="1", dir=none];
+  projeto -> participa [xlabel="1", dir=none];
+
+  // funcionario tem diversos dependentes; dependente e de um funcionario
+  funcionario -> dependente [xlabel="1", dir=none];
+}

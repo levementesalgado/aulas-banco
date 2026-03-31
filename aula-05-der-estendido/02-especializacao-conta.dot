@@ -1,0 +1,26 @@
+// Aula 05 - DER Estendido (2026-03-30)
+// Especializacao (p.26-28):
+//
+//   conta (superclasse) com atributos numero conta e agencia
+//   conta corrente (subclasse) com operacoes e valor-limite
+//   conta poupanca (subclasse) com taxa-juros e variacao
+//
+// As subclasses herdam numero_conta e agencia da superclasse, por isso
+// so os atributos acrescentados aparecem nas caixas.
+
+digraph DER {
+  graph [splines=curved, nodesep=1.0, ranksep=1.2, bgcolor=white,
+         fontname="Helvetica", pad=0.25, outputorder=edgesfirst];
+  node  [shape=record, style="filled,rounded", fillcolor="#fbfbfb",
+         color="#4a6fa5", fontname="Helvetica", fontsize=11, penwidth=1.2];
+  edge  [fontname="Helvetica", fontsize=10, color="#4a6fa5", penwidth=1.2, arrowsize=0.9];
+
+  conta [label="{conta|«PK» numero_conta : integer\l agencia : integer\l}", fillcolor="#eef2f8"];
+  conta_corrente [label="{conta_corrente|operacoes : varchar(60)\l valor_limite : numeric\l}"];
+  conta_poupanca [label="{conta_poupanca|taxa_juros : numeric\l variacao : numeric\l}"];
+
+  conta_corrente -> conta [arrowhead=empty, style=dashed, xlabel="especializacao", dir=back];
+  conta_poupanca -> conta [arrowhead=empty, style=dashed, xlabel="especializacao", dir=back];
+
+  { rank=same; conta_corrente; conta_poupanca }
+}

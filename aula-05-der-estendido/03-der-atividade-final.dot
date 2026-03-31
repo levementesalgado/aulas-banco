@@ -1,0 +1,54 @@
+// Aula 05 - DER Estendido (2026-03-30)
+// Atividade final (p.34) - enunciado literal do slide:
+//
+//   "Os cargos dos funcionarios responsaveis pela limpeza sao hierarquicos.
+//   Assim, deseja-se armazenar tambem, para cada funcionario de limpeza,
+//   informacoes sobre o funcionario de limpeza que o gerencia. Os funcionarios
+//   da companhia sao identificados por meio de um codigo de identificacao, e
+//   podem estar associados a apenas um unico departamento.
+//   Funcionarios que sao pesquisadores podem trabalhar em diversos projetos,
+//   independentemente desses projetos estarem sendo desenvolvidos no mesmo
+//   departamento no qual o empregado esta associado. Deve-se armazenar o
+//   numero de horas semanais trabalhadas por cada pesquisador em cada projeto
+//   no qual ele trabalha.
+//   Deve-se armazenar tambem informacoes sobre os dependentes de cada
+//   funcionario para propositos de ajuda familia. Deve-se armazenar o nome,
+//   o sexo e a data de aniversario, alem do grau de parentesco com o
+//   funcionario."
+//
+// departamento nao tem atributos no slide; foi usado (codigo, nome).
+// Hierarquia de limpeza e a especializacao pesquisador sao subclasses de
+// funcionario; horas semanais fica na associativa pesquisador x projeto.
+
+digraph DER {
+  graph [splines=curved, nodesep=0.8, ranksep=1.1, bgcolor=white,
+         fontname="Helvetica", pad=0.25, outputorder=edgesfirst];
+  node  [shape=record, style="filled,rounded", fillcolor="#fbfbfb",
+         color="#4a6fa5", fontname="Helvetica", fontsize=11, penwidth=1.2];
+  edge  [fontname="Helvetica", fontsize=10, color="#4a6fa5", penwidth=1.2, arrowsize=0.9];
+
+  departamento [label="{departamento|«PK» codigo : integer\l nome : varchar(60)\l}"];
+  funcionario [label="{funcionario|«PK» codigo : integer\l nome : varchar(60)\l sexo : char(1)\l data_nascimento : date\l}", fillcolor="#eef2f8"];
+  limpeza [label="{funcionario_limpeza|«FK» gerente : integer\l}"];
+  pesquisador [label="{pesquisador|}"];
+  projeto [label="{projeto|«PK» numero : integer\l nome : varchar(60)\l}"];
+  horas [label="{pesquisador_projeto|«FK» codigo : integer\l «FK» numero : integer\l horas_semanais : integer\l}"];
+  dependente [label="{dependente|«FK» codigo : integer\l nome : varchar(60)\l sexo : char(1)\l data_nascimento : date\l grau_parentesco : varchar(30)\l}"];
+
+  // funcionario esta associado a apenas um departamento
+  departamento -> funcionario [xlabel="1", dir=none];
+
+  // especializacoes (dashed, triangulo vazio apontando pra superclasse)
+  limpeza -> funcionario [arrowhead=empty, style=dashed, dir=back, xlabel="limpeza"];
+  pesquisador -> funcionario [arrowhead=empty, style=dashed, dir=back, xlabel="pesquisador"];
+
+  // hierarquia dos funcionarios de limpeza (gerencia outro de limpeza)
+  limpeza -> limpeza [xlabel="gerencia", dir=back];
+
+  // pesquisador trabalha em diversos projetos, guardando as horas semanais
+  pesquisador -> horas [dir=none];
+  projeto -> horas [dir=none];
+
+  // dependentes de cada funcionario
+  funcionario -> dependente [xlabel="1", dir=none];
+}
