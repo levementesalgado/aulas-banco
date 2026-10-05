@@ -1,0 +1,16 @@
+# LaTeX (projeto-1)
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+
+# diagramas gerados a partir do .dot (a fonte e o que vale)
+build/
+diagramas/*.pdf
+diagramas/*.png
+diagramas/*.svg
