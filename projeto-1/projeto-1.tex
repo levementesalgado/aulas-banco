@@ -1,0 +1,616 @@
+% =====================================================================
+%  Projeto 1 - Banco de Dados (Parte 1) — Universidade BR
+%  Compilar:
+%    mkdir -p diagramas/build && dot -Tpdf diagramas/conceitual.dot -o diagramas/build/conceitual.pdf
+%    dot -Tpdf diagramas/logico.dot -o diagramas/build/logico.pdf
+%    pdflatex projeto-1.tex   (2x)
+% =====================================================================
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{pdflscape}
+\usepackage[margin=2.5cm]{geometry}
+
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\setlist[itemize]{leftmargin=*,noitemsep}
+\setlist[enumerate]{leftmargin=*}
+
+\lstset{
+  language=SQL,
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny,
+  columns=flexible,
+  keepspaces=true,
+  showstringspaces=false
+}
+
+\title{\textbf{Projeto 1 — Banco de Dados (Parte 1)}\\[0.4em]
+\normalsize Universidade BR: modelagem de um sistema de gestão acadêmica}
+\author{Mateus Iuri Rocha\\[0.3em]
+\normalsize Curso de Tecnologia em Sistemas Inteligentes\\
+\normalsize Fatec Capão Bonito}
+\date{Entrega: 05/10/2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Este documento apresenta o Projeto de Banco de Dados (Parte 1) da
+Universidade BR, contemplando as três fases exigidas pelo enunciado:
+modelo conceitual, modelo lógico e modelo físico, além do dicionário de
+dados e da verificação da terceira forma normal (3FN). O modelo foi
+construído a partir dos treze requisitos do enunciado; o modelo físico é
+entregue como script \texttt{.sql} (\texttt{modelo-fisico.sql}) com onze
+tabelas e cinco registros em cada uma, executado e conferido no
+MySQL/MariaDB.
+\end{abstract}
+
+\tableofcontents
+
+% =====================================================================
+\section{Introdução}
+% =====================================================================
+
+O enunciado pede a construção de um banco de dados para uma universidade,
+passando pelas fases:
+
+\begin{enumerate}
+  \item Modelo Conceitual (entidades, atributos e relacionamentos);
+  \item Modelo Lógico (atributos com tipo de dado, chaves primárias e
+        estrangeiras);
+  \item Modelo Físico (script \texttt{.sql} com 5 registros em cada
+        tabela).
+\end{enumerate}
+
+O projeto deve possuir dicionário de dados e estar na 3FN, e todo o
+material deve ser documentado em PDF. Este documento é essa entrega, e o
+acompanham os arquivos \texttt{modelo-fisico.sql} (script físico),
+\texttt{diagramas/conceitual.dot} e \texttt{diagramas/logico.dot}
+(fontes dos diagramas, em Graphviz).
+
+% =====================================================================
+\section{Regras do enunciado e como foram tratadas}
+% =====================================================================
+
+A tabela abaixo mostra cada requisito literal do enunciado e onde ele
+aparece no modelo — é a rastreabilidade entre enunciado e entrega.
+
+\begin{longtable}{@{}p{0.46\textwidth}p{0.48\textwidth}@{}}
+\toprule
+\textbf{Regra do enunciado} & \textbf{Tratamento no modelo} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Regra do enunciado} & \textbf{Tratamento no modelo} \\
+\midrule
+\endhead
+A universidade BR possui 15 cursos atualmente
+& Entidade \texttt{curso}. Foram inseridos 5 cursos de exemplo (mínimo
+pedido pelo enunciado); a cardinalidade é independente da carga inicial. \\
+O aluno só pode estar matriculado em um curso
+& Chave estrangeira \texttt{aluno.codigo\_curso} — cada aluno tem uma
+única linha de curso. \\
+Os dados do aluno são nome, sobrenome, cpf, rg, filiação, endereço e
+telefone
+& Todos são atributos de \texttt{aluno} (o endereço foi decomposto em
+rua, número, bairro, cidade, uf e cep — ver 1FN na Seção~\ref{sec:3fn}). \\
+Os cursos possuem várias disciplinas
+& Relação N:N \texttt{curso} $\times$ \texttt{disciplina} materializada
+na entidade associativa \texttt{curso\_disciplina}. \\
+Disciplinas obrigatórias ou optativas dependendo do curso
+& Atributo \texttt{curso\_disciplina.tipo} ('obrigatoria' /
+'optativa'): o mesmo par curso--disciplina pode mudar de tipo, por isso
+ele fica na associativa e não na disciplina. \\
+Pré-requisito para cursar algumas disciplinas
+& Auto-relacionamento N:N da disciplina, materializado em
+\texttt{disciplina\_pre\_requisito}. \\
+O aluno pertence a apenas uma turma
+& Entidade \texttt{turma\_ingresso} (a turma de ingresso do curso),
+relacionada ao aluno em 1:N — \texttt{aluno.codigo\_turma}. \\
+Cada disciplina poderá ter no máximo 40 alunos por turma
+& Entidade \texttt{turma} (oferta da disciplina em um semestre) com
+\texttt{max\_alunos} $= 40$. Visto Seção~\ref{sec:conceitual}. \\
+Os dados das disciplinas: nome, descrição, quantidade de alunos e carga
+horária
+& Atributos de \texttt{disciplina} (a quantidade de alunos é derivada da
+contagem de matrículas, e está documentada como tal no dicionário). \\
+A disciplina pertence a departamentos específicos
+& Chave estrangeira \texttt{disciplina.codigo\_departamento} — relação
+N:1 disciplina--departamento. \\
+Alunos podem trancar matricula
+& Atributo \texttt{aluno.situacao\_matricula} ('ativa' / 'trancada'). \\
+Reprovado no máximo 2 vezes na mesma disciplina
+& Restrição de negócio documentada: a contagem de linhas de
+\texttt{historico} com \texttt{situacao} = 'reprovado' para o mesmo
+aluno e disciplina não pode ultrapassar 2 (ver Seção~\ref{sec:restr}). \\
+Histórico escolar com disciplinas cursadas, nota final, frequência e
+período
+& Entidade \texttt{historico} (aluno $\times$ turma), com
+\texttt{nota\_final}, \texttt{frequencia}, \texttt{periodo} e
+\texttt{situacao}; a disciplina é alcançada pela turma
+(\texttt{turma.codigo\_disciplina}). \\
+Professores lecionam no máximo 7 disciplinas ou nenhuma
+& Relação N:N \texttt{professor} $\times$ \texttt{disciplina} em
+\texttt{professor\_disciplina}; o limite de 7 é restrição documentada. \\
+Professores sempre vinculados a um departamento
+& \texttt{professor.codigo\_departamento} (N:1, obrigatório). \\
+Cada departamento controla um curso específico
+& Relação 1:1 \texttt{departamento} $\times$ \texttt{curso}. \\
+\bottomrule
+\end{longtable}
+
+% =====================================================================
+\section{Modelo conceitual}
+\label{sec:conceitual}
+% =====================================================================
+
+O modelo conceitual (Figura~\ref{fig:conceitual}) possui 7 entidades
+fortes, 4 entidades associativas (fruto das relações N:N) e 17
+relacionamentos. As entidades fortes são \texttt{curso},
+\texttt{departamento}, \texttt{turma\_ingresso}, \texttt{aluno},
+\texttt{disciplina}, \texttt{turma} e \texttt{professor}.
+
+Decisões de modelagem que merecem destaque:
+
+\begin{itemize}
+  \item \textbf{Duas entidades de turma.} O enunciado diz que ``o aluno
+        pertence a apenas uma turma'' e ao mesmo tempo que ``cada
+        disciplina poderá ter no máximo 40 alunos por turma''. As duas
+        frases se contradizem se turma for a mesma coisa nos dois casos.
+        Por isso existem \texttt{turma\_ingresso} (a turma de ingresso
+        do curso, em que o aluno se encaixa em 1:N) e \texttt{turma} (a
+        oferta de uma disciplina em um semestre, com no máximo 40
+        alunos, em que o aluno cursa N:N através do histórico).
+  \item \textbf{Pré-requisito como auto-relacionamento.} Uma disciplina
+        pode exigir outra disciplina; como o par pode se repetir, a
+        relação N:N virou a associativa
+        \texttt{disciplina\_pre\_requisito}.
+  \item \textbf{Obrigatória/optativa na associativa.} O tipo depende do
+        par (curso, disciplina): a mesma disciplina é obrigatória em um
+        curso e optativa em outro.
+  \item \textbf{Professor--disciplina em N:N.} O enunciado limita o
+        professor a 7 disciplinas, mas não diz que a disciplina tem um
+        professor só; a relação N:N cobre os dois lados.
+\end{itemize}
+
+\begin{landscape}
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\textwidth,height=0.86\textheight,keepaspectratio]%
+    {diagramas/build/conceitual.pdf}
+  \caption{Modelo conceitual — entidades, atributos e cardinalidades.}
+  \label{fig:conceitual}
+\end{figure}
+\end{landscape}
+
+% =====================================================================
+\section{Modelo lógico}
+% =====================================================================
+
+A transformação para o modelo lógico (Figura~\ref{fig:logico}) seguiu as
+regras clássicas:
+
+\begin{itemize}
+  \item cada atributo ganhou tipo de dado (\texttt{integer},
+        \texttt{varchar(n)}, \texttt{numeric(4,2)}, \texttt{char(2)});
+  \item cada entidade forte recebeu chave primária própria;
+  \item as entidades associativas receberam chave primária composta pelas
+        chaves das entidades participantes;
+  \item cada relação N:1 virou chave estrangeira no lado ``N''
+        (\texttt{aluno}, \texttt{disciplina}, \texttt{turma},
+        \texttt{professor}, \texttt{turma\_ingresso},
+        \texttt{departamento});
+  \item a relação 1:1 departamento--curso virou a chave estrangeira
+        \texttt{departamento.codigo\_curso}.
+\end{itemize}
+
+\begin{landscape}
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\textwidth,height=0.86\textheight,keepaspectratio]%
+    {diagramas/build/logico.pdf}
+  \caption{Modelo lógico — tipos, chaves primárias e estrangeiras.}
+  \label{fig:logico}
+\end{figure}
+\end{landscape}
+
+% =====================================================================
+\section{Modelo físico}
+\label{sec:fisico}
+% =====================================================================
+
+O script físico está no anexo \texttt{modelo-fisico.sql} e é listado
+integralmente a seguir. Ele cria o banco \texttt{ universidade\_br}, as
+11 tabelas com suas chaves estrangeiras e carrega \textbf{5 registros em
+cada tabela} (55 no total), conforme o enunciado.
+
+Para executar (MySQL/MariaDB):
+
+\begin{lstlisting}[language=bash,frame=none,numbers=none]
+sudo mysql universidade_br < modelo-fisico.sql
+\end{lstlisting}
+
+Conferência da carga (executada na entrega):
+
+\begin{lstlisting}[language=bash,frame=none,numbers=none]
+SELECT 'curso', COUNT(*) FROM universidade_br.curso
+UNION ALL SELECT 'departamento', COUNT(*) FROM universidade_br.departamento
+UNION ALL SELECT 'turma_ingresso', COUNT(*) FROM universidade_br.turma_ingresso
+UNION ALL SELECT 'aluno', COUNT(*) FROM universidade_br.aluno
+UNION ALL SELECT 'disciplina', COUNT(*) FROM universidade_br.disciplina
+UNION ALL SELECT 'turma', COUNT(*) FROM universidade_br.turma
+UNION ALL SELECT 'professor', COUNT(*) FROM universidade_br.professor
+UNION ALL SELECT 'curso_disciplina', COUNT(*) FROM universidade_br.curso_disciplina
+UNION ALL SELECT 'disciplina_pre_requisito', COUNT(*) FROM universidade_br.disciplina_pre_requisito
+UNION ALL SELECT 'professor_disciplina', COUNT(*) FROM universidade_br.professor_disciplina
+UNION ALL SELECT 'historico', COUNT(*) FROM universidade_br.historico;
+\end{lstlisting}
+
+As 11 linhas retornadas foram \texttt{5} em todas as tabelas.
+
+\subsection{Script completo}
+
+\lstinputlisting{modelo-fisico.sql}
+
+% =====================================================================
+\section{Dicionário de dados}
+\label{sec:dicionario}
+% =====================================================================
+
+\subsection{Primeira parte — visão geral}
+
+\begin{longtable}{@{}ll@{}}
+\toprule
+\textbf{Campo} & \textbf{Valor} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Campo} & \textbf{Valor} \\
+\midrule
+\endhead
+Banco de dados & \texttt{universidade\_br} \\
+Sistema & Gestão acadêmica da Universidade BR \\
+Tabelas & 11 (7 entidades fortes + 4 associativas) \\
+Registros por tabela & 5 (55 no total) \\
+Autor & Mateus Iuri Rocha \\
+Data & 05/10/2026 \\
+\bottomrule
+\end{longtable}
+
+Relacionamentos existentes:
+
+\begin{longtable}{@{}lll@{}}
+\toprule
+\textbf{Origem} & \textbf{Destino} & \textbf{Cardinalidade} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Origem} & \textbf{Destino} & \textbf{Cardinalidade} \\
+\midrule
+\endhead
+departamento & curso & 1:1 \\
+turma\_ingresso & curso & N:1 \\
+aluno & curso & N:1 \\
+aluno & turma\_ingresso & N:1 \\
+disciplina & departamento & N:1 \\
+turma & disciplina & N:1 \\
+professor & departamento & N:1 \\
+curso $\times$ disciplina & curso\_disciplina & N:N \\
+disciplina $\times$ disciplina & disciplina\_pre\_requisito & N:N \\
+professor $\times$ disciplina & professor\_disciplina & N:N \\
+aluno $\times$ turma & historico & N:N \\
+\bottomrule
+\end{longtable}
+
+\subsection{Segunda parte — cada entidade}
+
+\subsubsection{curso}
+
+\begin{longtable}{@{}llll@{}}
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endhead
+codigo & integer & PK & Identificador do curso \\
+nome & varchar(60) & --- & Nome do curso \\
+turno & varchar(20) & --- & Turno (matutino, vespertino, noturno) \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{departamento}
+
+\begin{longtable}{@{}llll@{}}
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endhead
+codigo & integer & PK & Identificador do departamento \\
+nome & varchar(60) & --- & Nome do departamento \\
+codigo\_curso & integer & FK & Curso controlado pelo departamento (1:1) \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{turma\_ingresso}
+
+\begin{longtable}{@{}llll@{}}
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endhead
+codigo & integer & PK & Identificador da turma de ingresso \\
+semestre & varchar(7) & --- & Semestre de ingresso (ex.: 2024.1) \\
+codigo\_curso & integer & FK & Curso da turma \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{aluno}
+
+\begin{longtable}{@{}llll@{}}
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endhead
+cpf & varchar(11) & PK & CPF do aluno (identificador) \\
+nome & varchar(60) & --- & Primeiro nome \\
+sobrenome & varchar(60) & --- & Sobrenome \\
+rg & varchar(20) & --- & Registro Geral \\
+filiacao & varchar(120) & --- & Filiação \\
+rua & varchar(80) & --- & Rua do endereço \\
+numero & varchar(10) & --- & Número do endereço \\
+bairro & varchar(60) & --- & Bairro \\
+cidade & varchar(60) & --- & Cidade \\
+uf & char(2) & --- & Unidade federativa \\
+cep & varchar(8) & --- & CEP \\
+telefone & varchar(20) & --- & Telefone de contato \\
+situacao\_matricula & varchar(20) & --- & 'ativa' ou 'trancada' \\
+codigo\_curso & integer & FK & Curso em que o aluno está matriculado \\
+codigo\_turma & integer & FK & Turma de ingresso (aluno pertence a 1) \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{disciplina}
+
+\begin{longtable}{@{}llll@{}}
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endhead
+codigo & integer & PK & Identificador da disciplina \\
+nome & varchar(60) & --- & Nome da disciplina \\
+descricao & varchar(255) & --- & Ementa resumida \\
+carga\_horaria & integer & --- & Carga horária em horas \\
+quantidade\_alunos & integer & --- & Alunos matriculados (derivado:
+contagem de matrículas ativas) \\
+codigo\_departamento & integer & FK & Departamento dono da disciplina \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{turma}
+
+\begin{longtable}{@{}llll@{}}
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endhead
+codigo & integer & PK & Identificador da turma \\
+semestre & varchar(7) & --- & Semestre da oferta \\
+max\_alunos & integer & --- & Limite de alunos (40) \\
+codigo\_disciplina & integer & FK & Disciplina ofertada \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{professor}
+
+\begin{longtable}{@{}llll@{}}
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endhead
+matricula & integer & PK & Matrícula do professor \\
+nome & varchar(60) & --- & Nome completo \\
+cpf & varchar(11) & --- & CPF \\
+codigo\_departamento & integer & FK & Departamento de vinculação \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{curso\_disciplina}
+
+\begin{longtable}{@{}llll@{}}
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endhead
+codigo\_curso & integer & PK/FK & Curso da relação \\
+codigo\_disciplina & integer & PK/FK & Disciplina da relação \\
+tipo & varchar(20) & --- & 'obrigatoria' ou 'optativa' no curso \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{disciplina\_pre\_requisito}
+
+\begin{longtable}{@{}llll@{}}
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endhead
+codigo\_disciplina & integer & PK/FK & Disciplina que exige o pré-requisito \\
+codigo\_pre\_requisito & integer & PK/FK & Disciplina exigida \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{professor\_disciplina}
+
+\begin{longtable}{@{}llll@{}}
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endhead
+matricula & integer & PK/FK & Professor que leciona \\
+codigo\_disciplina & integer & PK/FK & Disciplina lecionada \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{historico}
+
+\begin{longtable}{@{}llll@{}}
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
+\midrule
+\endhead
+codigo & integer & PK & Identificador do registro \\
+cpf\_aluno & varchar(11) & FK & Aluno dono do registro \\
+codigo\_turma & integer & FK & Turma cursada \\
+nota\_final & numeric(4,2) & --- & Nota final (0 a 10) \\
+frequencia & integer & --- & Frequência em percentual \\
+periodo & varchar(7) & --- & Período do curso (ex.: 2026.1) \\
+situacao & varchar(20) & --- & 'cursando', 'aprovado', 'reprovado' \\
+\bottomrule
+\end{longtable}
+
+% =====================================================================
+\section{Normalização — 1FN, 2FN e 3FN}
+\label{sec:3fn}
+% =====================================================================
+
+\subsection{Primeira forma normal (1FN)}
+
+Todos os atributos são atômicos — não existem grupos repetidos nem
+valores multivalorados. O endereço, que no enunciado aparece como um
+campo só, foi decomposto em \texttt{rua}, \texttt{numero},
+\texttt{bairro}, \texttt{cidade}, \texttt{uf} e \texttt{cep}; a filiação
+e o telefone são um valor por aluno. Cada linha é identificável por uma
+chave.
+
+\subsection{Segunda forma normal (2FN)}
+
+Só há chave composta nas entidades associativas, e nelas todo atributo
+não-chave depende da chave inteira:
+
+\begin{itemize}
+  \item \texttt{curso\_disciplina.tipo} depende do par
+        (curso, disciplina) — a mesma disciplina é obrigatória em um
+        curso e optativa em outro, logo não depende só do curso nem só
+        da disciplina;
+  \item \texttt{disciplina\_pre\_requisito} e
+        \texttt{professor\_disciplina} não têm atributos não-chave;
+  \item nas entidades de chave simples, qualquer atributo depende da
+        chave inteira por definição.
+\end{itemize}
+
+Não há, portanto, dependência parcial.
+
+\subsection{Terceira forma normal (3FN)}
+
+Não há dependência transitiva — nenhum atributo não-chave depende de
+outro não-chave:
+
+\begin{itemize}
+  \item \texttt{disciplina} guarda o \texttt{codigo\_departamento}, e
+        não o nome ou a localização do departamento (que ficariam
+        transitivos);
+  \item \texttt{aluno} guarda \texttt{codigo\_curso} e
+        \texttt{codigo\_turma}, e não o nome do curso;
+  \item \texttt{historico} guarda a nota/frequência/periodo, e não
+        repete os dados da disciplina, alcançados pela turma;
+  \item \texttt{departamento} referencia o curso por chave, mantendo a
+        relação 1:1 explícita.
+  \item \texttt{disciplina.quantidade\_alunos} é derivado (contagem de
+        matrículas); mantivemos o atributo por exigência do enunciado,
+        documentado no dicionário como derivado — ele não depende de
+        nenhum outro atributo da própria tabela.
+\end{itemize}
+
+Todas as 11 tabelas estão na 3FN.
+
+% =====================================================================
+\section{Restrições de negócio documentadas}
+\label{sec:restr}
+% =====================================================================
+
+Algumas regras do enunciado são restrições e não estrutura; foram
+deixadas documentadas (podem ser impostas por gatilho/consulta):
+
+\begin{itemize}
+  \item no máximo 40 alunos por turma:
+        \texttt{SELECT codigo\_turma, COUNT(*) FROM historico
+        GROUP BY codigo\_turma HAVING COUNT(*) > 40} deve retornar vazio;
+  \item no máximo 7 disciplinas por professor:
+        \texttt{SELECT matricula, COUNT(*) FROM professor\_disciplina
+        GROUP BY matricula HAVING COUNT(*) > 7};
+  \item no máximo 2 reprovações do aluno na mesma disciplina:
+        contar linhas de \texttt{historico} com
+        \texttt{situacao='reprovado'} agrupadas por
+        (cpf\_aluno, disciplina da turma);
+  \item professor pode não lecionar nenhuma disciplina: basta não
+        existir linha em \texttt{professor\_disciplina};
+  \item matrícula trancada: \texttt{aluno.situacao\_matricula}
+        \texttt{= 'trancada'}.
+\end{itemize}
+
+% =====================================================================
+\section{Conclusão}
+% =====================================================================
+
+Os três modelos foram entregues e conferidos: o conceitual cobre os 13
+requisitos do enunciado, o lógico transforma cada relação em chave
+estrangeira ou associativa, e o físico é um script executável que cria
+11 tabelas e carrega 5 registros em cada uma. O dicionário de dados
+descreve os 52 atributos do banco e a análise mostrou que o modelo está
+na 3FN.
+
+\end{document}

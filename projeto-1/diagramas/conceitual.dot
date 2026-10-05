@@ -1,0 +1,53 @@
+// Projeto 1 - Banco de Dados (Parte 1)
+// Modelo CONCEITUAL (entidades, atributos e cardinalidades; sem tipos/chaves)
+//
+// Regras do enunciado cobertas por aresta:
+//   departamento -- curso        1:1  "cada departamento controla um curso"
+//   aluno -- curso               N:1  "aluno so pode estar matriculado em um curso"
+//   aluno -- turma_ingresso      N:1  "o aluno pertence a apenas uma turma"
+//   turma_ingresso -- curso      N:1
+//   disciplina -- departamento   N:1  "a disciplina pertence a departamentos"
+//   turma -- disciplina          N:1  "40 alunos por turma" (max_alunos)
+//   professor -- departamento    N:1  "sempre vinculados a um departamento"
+//   curso x disciplina           N:N  "obrigatoria ou optativa dependendo do curso"
+//   disciplina x disciplina      N:N  "pre-requisito" (auto-relacionamento)
+//   professor x disciplina       N:N  "no maximo 7 disciplinas"
+//   aluno x turma                N:N  historico: nota final, frequencia, periodo
+
+digraph Conceitual {
+  graph [splines=curved, nodesep=0.7, ranksep=1.0, bgcolor=white,
+         fontname="Helvetica", pad=0.3, outputorder=edgesfirst];
+  node  [shape=record, style="filled,rounded", fillcolor="#fbfbfb",
+         color="#4a6fa5", fontname="Helvetica", fontsize=11, penwidth=1.3];
+  edge  [fontname="Helvetica", fontsize=10, color="#4a6fa5", penwidth=1.3, arrowsize=0.8];
+
+  departamento [label="{departamento|codigo\lnome\l}"];
+  curso [label="{curso|codigo\lnome\lturno\l}"];
+  turma_ingresso [label="{turma_ingresso|codigo\lsemestre\l}"];
+  aluno [label="{aluno|cpf\lnome\lsobrenome\lrg\lfiliacao\lendereco\ltelefone\lsituacao_matricula\l}"];
+  disciplina [label="{disciplina|codigo\lnome\ldescricao\lcarga_horaria\lquantidade_alunos\l}"];
+  turma [label="{turma|codigo\lsemestre\lmax_alunos\l}"];
+  professor [label="{professor|matricula\lnome\lcpf\l}"];
+  curso_disciplina [label="{curso_disciplina|tipo (obrigatoria / optativa)\l}"];
+  disciplina_pre_requisito [label="{disciplina_pre_requisito| (N:N da disciplina consigo mesma)\l}"];
+  professor_disciplina [label="{professor_disciplina| (N:N)\l}"];
+  historico [label="{historico|nota_final\lfrequencia\lperiodo\lsituacao\l}"];
+
+  // ---- funcionais -------------------------------------------------------
+  departamento -> curso [xlabel="1", dir=none];
+  turma_ingresso -> curso [xlabel="N", dir=none];
+  aluno -> curso [xlabel="N", dir=none];
+  aluno -> turma_ingresso [xlabel="1", dir=none];
+  disciplina -> departamento [xlabel="N", dir=none];
+  turma -> disciplina [xlabel="N", dir=none];
+  professor -> departamento [xlabel="N", dir=none];
+
+  // ---- N:N (entidades associativas) -------------------------------------
+  curso -> curso_disciplina [xlabel="N", dir=none];
+  disciplina -> curso_disciplina [xlabel="N", dir=none];
+  disciplina -> disciplina_pre_requisito [xlabel="N : N (pre-requisito)", dir=none];
+  professor -> professor_disciplina [xlabel="N", dir=none];
+  disciplina -> professor_disciplina [xlabel="N", dir=none];
+  aluno -> historico [xlabel="N", dir=none];
+  turma -> historico [xlabel="N", dir=none];
+}

@@ -32,6 +32,21 @@ dot -Tpdf aula-05-der-estendido/01-der-empresa-xwz.dot \
 A pasta `build/` é ignorada pelo git — só a fonte vale.
 
 
+## Projeto 1
+
+Entrega de 05/10/2026 (prazo do Classroom). Tudo em `projeto-1/`:
+
+```
+projeto-1/
+  projeto-1.pdf        entrega em PDF (gerado de projeto-1.tex)
+  projeto-1.tex        fonte LaTeX do documento
+  modelo-fisico.sql    script físico: 11 tabelas x 5 registros (testado)
+  diagramas/
+    conceitual.dot     modelo conceitual (Graphviz)
+    logico.dot         modelo lógico (tipos, PK, FK)
+```
+
+
 ## Arquivos soltos da home
 
 ```
