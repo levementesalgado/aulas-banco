@@ -1,39 +1,45 @@
 // Projeto 1 - Banco de Dados (Parte 1)
 // Modelo LOGICO (mesmas entidades do conceitual + tipos, PK e FK)
 // Espelha tabela por tabela o modelo-fisico.sql
+//
+// Arestas rotuladas com o verbo da relacao + cardinalidade (xlabel, porque
+// splines=ortho nao renderiza label).
+// Cada atributo ocupa duas linhas (nome / tipo) para o diagrama nao ficar
+// largo demais na pagina.
 
 digraph Logico {
-  graph [splines=curved, nodesep=0.7, ranksep=1.0, bgcolor=white,
-         fontname="Helvetica", pad=0.3, outputorder=edgesfirst];
+  graph [rankdir=LR, splines=ortho, outputorder=nodesfirst, nodesep=0.4, ranksep=0.3,
+         bgcolor=white, fontname="Helvetica", pad=0.15];
   node  [shape=record, style="filled,rounded", fillcolor="#fbfbfb",
-         color="#4a6fa5", fontname="Helvetica", fontsize=10, penwidth=1.3];
-  edge  [fontname="Helvetica", fontsize=9, color="#4a6fa5", penwidth=1.3, arrowsize=0.8];
+         color="#4a6fa5", fontname="Helvetica", fontsize=13, penwidth=1.4];
+  edge  [fontname="Helvetica", fontsize=12, color="#4a6fa5", penwidth=1.4,
+         arrowsize=0.9];
 
-  departamento [label="{departamento|«PK» codigo : integer\l nome : varchar(60)\l «FK» codigo_curso : integer\l}"];
+  departamento [label="{departamento|«PK» codigo : integer\l nome : varchar(60)\l «FK» codigo_curso\linteger\l}"];
   curso [label="{curso|«PK» codigo : integer\l nome : varchar(60)\l turno : varchar(20)\l}"];
-  turma_ingresso [label="{turma_ingresso|«PK» codigo : integer\l semestre : varchar(7)\l «FK» codigo_curso : integer\l}"];
-  aluno [label="{aluno|«PK» cpf : varchar(11)\l nome : varchar(60)\l sobrenome : varchar(60)\l rg : varchar(20)\l filiacao : varchar(120)\l rua,numero,bairro,cidade,uf,cep\l telefone : varchar(20)\l situacao_matricula : varchar(20)\l «FK» codigo_curso : integer\l «FK» codigo_turma : integer\l}"];
-  disciplina [label="{disciplina|«PK» codigo : integer\l nome : varchar(60)\l descricao : varchar(255)\l carga_horaria : integer\l quantidade_alunos : integer\l «FK» codigo_departamento : integer\l}"];
-  turma [label="{turma|«PK» codigo : integer\l semestre : varchar(7)\l max_alunos : integer\l «FK» codigo_disciplina : integer\l}"];
-  professor [label="{professor|«PK» matricula : integer\l nome : varchar(60)\l cpf : varchar(11)\l «FK» codigo_departamento : integer\l}"];
-  curso_disciplina [label="{curso_disciplina|«PK» «FK» codigo_curso : integer\l «PK» «FK» codigo_disciplina : integer\l tipo : varchar(20)\l}"];
-  disciplina_pre_requisito [label="{disciplina_pre_requisito|«PK» «FK» codigo_disciplina : integer\l «PK» «FK» codigo_pre_requisito : integer\l}"];
-  professor_disciplina [label="{professor_disciplina|«PK» «FK» matricula : integer\l «PK» «FK» codigo_disciplina : integer\l}"];
-  historico [label="{historico|«PK» codigo : integer\l «FK» cpf_aluno : varchar(11)\l «FK» codigo_turma : integer\l nota_final : numeric(4,2)\l frequencia : integer\l periodo : varchar(7)\l situacao : varchar(20)\l}"];
+  turma_ingresso [label="{turma_\lingresso|«PK» codigo : integer\l semestre : varchar(7)\l «FK» codigo_curso\linteger\l}"];
+  aluno [label="{aluno|«PK» cpf : varchar(11)\l nome : varchar(60)\l sobrenome\lvarchar(60)\l rg : varchar(20)\l filiacao : varchar(120)\l rua : varchar(80)\l numero : varchar(10)\l bairro : varchar(60)\l cidade : varchar(60)\l uf : char(2)\l cep : varchar(8)\l telefone : varchar(20)\l situacao_matricula\lvarchar(20)\l «FK» codigo_curso\linteger\l «FK» codigo_turma\linteger\l}"];
+  disciplina [label="{disciplina|«PK» codigo : integer\l nome : varchar(60)\l descricao\lvarchar(255)\l carga_horaria\linteger\l quantidade_alunos\linteger\l «FK» codigo_departamento\linteger\l}"];
+  turma [label="{turma|«PK» codigo : integer\l semestre : varchar(7)\l max_alunos : integer\l «FK» codigo_disciplina\linteger\l}"];
+  professor [label="{professor|«PK» matricula\linteger\l nome : varchar(60)\l cpf : varchar(11)\l «FK» codigo_departamento\linteger\l}"];
+  curso_disciplina [label="{curso_\ldisciplina|«PK/FK»\lcodigo_curso\linteger\l «PK/FK»\lcodigo_disciplina\linteger\l tipo : varchar(20)\l}"];
+  disciplina_pre_requisito [label="{disciplina_\lpre_requisito|«PK/FK»\lcodigo_disciplina\linteger\l «PK/FK»\lcodigo_pre_requisito\linteger\l}"];
+  professor_disciplina [label="{professor_\ldisciplina|«PK/FK»\lmatricula\linteger\l «PK/FK»\lcodigo_disciplina\linteger\l}"];
+  historico [label="{historico|«PK» codigo : integer\l «FK» cpf_aluno\lvarchar(11)\l «FK» codigo_turma\linteger\l nota_final\l numeric(4,2)\l frequencia : integer\l periodo : varchar(7)\l situacao : varchar(20)\l}"];
 
-  departamento -> curso [xlabel="1", dir=none];
-  turma_ingresso -> curso [xlabel="N", dir=none];
-  aluno -> curso [xlabel="N", dir=none];
-  aluno -> turma_ingresso [xlabel="1", dir=none];
-  disciplina -> departamento [xlabel="N", dir=none];
-  turma -> disciplina [xlabel="N", dir=none];
-  professor -> departamento [xlabel="N", dir=none];
+  departamento -> curso [xlabel="controla\n1:1"];
+  turma_ingresso -> curso [xlabel="pertence a\nN:1"];
+  aluno -> curso [xlabel="matricula-se em\nN:1"];
+  aluno -> turma_ingresso [xlabel="ingressa em\nN:1"];
+  disciplina -> departamento [xlabel="pertence a\nN:1"];
+  turma -> disciplina [xlabel="oferta de\nN:1"];
+  professor -> departamento [xlabel="vincula-se a\nN:1"];
 
-  curso -> curso_disciplina [xlabel="N", dir=none];
-  disciplina -> curso_disciplina [xlabel="N", dir=none];
-  disciplina -> disciplina_pre_requisito [xlabel="N : N", dir=none];
-  professor -> professor_disciplina [xlabel="N", dir=none];
-  disciplina -> professor_disciplina [xlabel="N", dir=none];
-  aluno -> historico [xlabel="N", dir=none];
-  turma -> historico [xlabel="N", dir=none];
+  curso -> curso_disciplina [xlabel="contem\nN"];
+  disciplina -> curso_disciplina [xlabel="compoem\nN"];
+  disciplina -> disciplina_pre_requisito [xlabel="exige\nN:N"];
+  professor -> professor_disciplina [xlabel="leciona\nN"];
+  disciplina -> professor_disciplina [xlabel="e lecionada por\nN"];
+  aluno -> historico [xlabel="registra\nN"];
+  turma -> historico [xlabel="esta em\nN"];
 }

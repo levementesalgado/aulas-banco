@@ -69,6 +69,10 @@ dados/
 
 Os originais continuam na home. Este repo é cópia organizada, nada foi apagado.
 
+Os arquivos SQLite (`sql/03` e `empresa.db`) não são dialeto do professor:
+são os rascunhos que eu mesmo fiz de cabeça durante a aula, por isso eles
+não seguem os slides.
+
 ## Como rodar
 
 ```ksh
@@ -76,17 +80,20 @@ Os originais continuam na home. Este repo é cópia organizada, nada foi apagado
 mysql < aula-12-dml/01-atividade-empresa3.sql
 mysql < aula-16-tcl/01-atividade-tcl.sql
 
-# SQLite
+# SQLite (rascunho meu, feito de cabeça em aula)
 sqlite3 dados/empresa.db < sql/03-relacionamentos-e-joins.sql
 ```
 
 ## Cuidado com o dialeto
 
-A aula mistura MySQL e SQLite, e os dois primeiros scripts da pasta `sql/`
-**não são o mesmo exercício do `empresa.db`**:
+O professor só passou MySQL. Os scripts `sql/01` a `04` e o
+`dados/empresa.db` são anotações minhas de aula (escritas de cabeça), não
+material do slide, e por isso não seguem o dialeto do professor:
 
 - `01`/`02` criam a tabela `funcionarios` (colunas `Codfunc`, `nomefunc`, `salfunc`…)
 - `03` cria `departamento` / `funcionario` / `dependente` (colunas `idfun`, `funnome`…)
+  e está em SQLite, porque foi feito na aula sem consultar o slide
+- `04` está em MySQL
 
 `dados/empresa.db` é o resultado do `03`, não do `01`.
 
@@ -103,6 +110,6 @@ reclamar.
   marcados com comentários no arquivo e precisam ser reconstruídos.
 - **`sql/03` não tem nenhuma consulta.** O script só cria e popula. Faltam os
   `SELECT` com `JOIN` — que é justamente o assunto do arquivo.
-- Dialeto misto: se a aula é MySQL, o `03` precisa ser portado
-  (`AUTOINCREMENT` → `AUTO_INCREMENT`).
+- `sql/03` é SQLite (feito de cabeça em aula); se quiser rodar junto dos
+  scripts MySQL, portar `AUTOINCREMENT` → `AUTO_INCREMENT`.
 - Faltam as pastas das aulas 01, 06, 07 e 08 (modelagem/dicionário) e 10/11 (revisão).

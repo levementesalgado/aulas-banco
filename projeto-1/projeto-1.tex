@@ -1,5 +1,5 @@
 % =====================================================================
-%  Projeto 1 - Banco de Dados (Parte 1) — Universidade BR
+%  Projeto 1 - Banco de Dados (Parte 1), Universidade BR
 %  Compilar:
 %    mkdir -p diagramas/build && dot -Tpdf diagramas/conceitual.dot -o diagramas/build/conceitual.pdf
 %    dot -Tpdf diagramas/logico.dot -o diagramas/build/logico.pdf
@@ -22,6 +22,7 @@
 \hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
 \setlist[itemize]{leftmargin=*,noitemsep}
 \setlist[enumerate]{leftmargin=*}
+\setlength{\emergencystretch}{3em}
 
 \lstset{
   language=SQL,
@@ -35,7 +36,7 @@
   showstringspaces=false
 }
 
-\title{\textbf{Projeto 1 — Banco de Dados (Parte 1)}\\[0.4em]
+\title{\textbf{Projeto 1 - Banco de Dados (Parte 1)}\\[0.4em]
 \normalsize Universidade BR: modelagem de um sistema de gestão acadêmica}
 \author{Mateus Iuri Rocha\\[0.3em]
 \normalsize Curso de Tecnologia em Sistemas Inteligentes\\
@@ -84,7 +85,7 @@ acompanham os arquivos \texttt{modelo-fisico.sql} (script físico),
 % =====================================================================
 
 A tabela abaixo mostra cada requisito literal do enunciado e onde ele
-aparece no modelo — é a rastreabilidade entre enunciado e entrega.
+aparece no modelo: é a rastreabilidade entre enunciado e entrega.
 
 \begin{longtable}{@{}p{0.46\textwidth}p{0.48\textwidth}@{}}
 \toprule
@@ -99,12 +100,12 @@ A universidade BR possui 15 cursos atualmente
 & Entidade \texttt{curso}. Foram inseridos 5 cursos de exemplo (mínimo
 pedido pelo enunciado); a cardinalidade é independente da carga inicial. \\
 O aluno só pode estar matriculado em um curso
-& Chave estrangeira \texttt{aluno.codigo\_curso} — cada aluno tem uma
+& Chave estrangeira \texttt{aluno.codigo\_curso}, cada aluno tem uma
 única linha de curso. \\
 Os dados do aluno são nome, sobrenome, cpf, rg, filiação, endereço e
 telefone
 & Todos são atributos de \texttt{aluno} (o endereço foi decomposto em
-rua, número, bairro, cidade, uf e cep — ver 1FN na Seção~\ref{sec:3fn}). \\
+rua, número, bairro, cidade, uf e cep, ver 1FN na Seção~\ref{sec:3fn}). \\
 Os cursos possuem várias disciplinas
 & Relação N:N \texttt{curso} $\times$ \texttt{disciplina} materializada
 na entidade associativa \texttt{curso\_disciplina}. \\
@@ -117,7 +118,7 @@ Pré-requisito para cursar algumas disciplinas
 \texttt{disciplina\_pre\_requisito}. \\
 O aluno pertence a apenas uma turma
 & Entidade \texttt{turma\_ingresso} (a turma de ingresso do curso),
-relacionada ao aluno em 1:N — \texttt{aluno.codigo\_turma}. \\
+relacionada ao aluno em 1:N, \texttt{aluno.codigo\_turma}. \\
 Cada disciplina poderá ter no máximo 40 alunos por turma
 & Entidade \texttt{turma} (oferta da disciplina em um semestre) com
 \texttt{max\_alunos} $= 40$. Visto Seção~\ref{sec:conceitual}. \\
@@ -126,7 +127,7 @@ horária
 & Atributos de \texttt{disciplina} (a quantidade de alunos é derivada da
 contagem de matrículas, e está documentada como tal no dicionário). \\
 A disciplina pertence a departamentos específicos
-& Chave estrangeira \texttt{disciplina.codigo\_departamento} — relação
+& Chave estrangeira \texttt{disciplina.codigo\_departamento}, relação
 N:1 disciplina--departamento. \\
 Alunos podem trancar matricula
 & Atributo \texttt{aluno.situacao\_matricula} ('ativa' / 'trancada'). \\
@@ -187,9 +188,9 @@ Decisões de modelagem que merecem destaque:
 \begin{landscape}
 \begin{figure}[p]
   \centering
-  \includegraphics[width=\textwidth,height=0.86\textheight,keepaspectratio]%
+  \includegraphics[width=24.7cm,keepaspectratio]%
     {diagramas/build/conceitual.pdf}
-  \caption{Modelo conceitual — entidades, atributos e cardinalidades.}
+  \caption{Modelo conceitual: entidades, atributos e cardinalidades.}
   \label{fig:conceitual}
 \end{figure}
 \end{landscape}
@@ -218,9 +219,9 @@ regras clássicas:
 \begin{landscape}
 \begin{figure}[p]
   \centering
-  \includegraphics[width=\textwidth,height=0.86\textheight,keepaspectratio]%
+  \includegraphics[width=24.7cm,keepaspectratio]%
     {diagramas/build/logico.pdf}
-  \caption{Modelo lógico — tipos, chaves primárias e estrangeiras.}
+  \caption{Modelo lógico: tipos, chaves primárias e estrangeiras.}
   \label{fig:logico}
 \end{figure}
 \end{landscape}
@@ -268,7 +269,7 @@ As 11 linhas retornadas foram \texttt{5} em todas as tabelas.
 \label{sec:dicionario}
 % =====================================================================
 
-\subsection{Primeira parte — visão geral}
+\subsection{Primeira parte: visão geral}
 
 \begin{longtable}{@{}ll@{}}
 \toprule
@@ -313,7 +314,7 @@ aluno $\times$ turma & historico & N:N \\
 \bottomrule
 \end{longtable}
 
-\subsection{Segunda parte — cada entidade}
+\subsection{Segunda parte: cada entidade}
 
 \subsubsection{curso}
 
@@ -397,7 +398,7 @@ codigo\_turma & integer & FK & Turma de ingresso (aluno pertence a 1) \\
 
 \subsubsection{disciplina}
 
-\begin{longtable}{@{}llll@{}}
+\begin{longtable}{@{}lllp{0.42\textwidth}@{}}
 \toprule
 \textbf{Atributo} & \textbf{Tipo} & \textbf{Chave} & \textbf{Descrição} \\
 \midrule
@@ -523,13 +524,13 @@ situacao & varchar(20) & --- & 'cursando', 'aprovado', 'reprovado' \\
 \end{longtable}
 
 % =====================================================================
-\section{Normalização — 1FN, 2FN e 3FN}
+\section{Normalização: 1FN, 2FN e 3FN}
 \label{sec:3fn}
 % =====================================================================
 
 \subsection{Primeira forma normal (1FN)}
 
-Todos os atributos são atômicos — não existem grupos repetidos nem
+Todos os atributos são atômicos: não existem grupos repetidos nem
 valores multivalorados. O endereço, que no enunciado aparece como um
 campo só, foi decomposto em \texttt{rua}, \texttt{numero},
 \texttt{bairro}, \texttt{cidade}, \texttt{uf} e \texttt{cep}; a filiação
@@ -543,7 +544,7 @@ não-chave depende da chave inteira:
 
 \begin{itemize}
   \item \texttt{curso\_disciplina.tipo} depende do par
-        (curso, disciplina) — a mesma disciplina é obrigatória em um
+        (curso, disciplina): a mesma disciplina é obrigatória em um
         curso e optativa em outro, logo não depende só do curso nem só
         da disciplina;
   \item \texttt{disciplina\_pre\_requisito} e
@@ -556,7 +557,7 @@ Não há, portanto, dependência parcial.
 
 \subsection{Terceira forma normal (3FN)}
 
-Não há dependência transitiva — nenhum atributo não-chave depende de
+Não há dependência transitiva: nenhum atributo não-chave depende de
 outro não-chave:
 
 \begin{itemize}
@@ -571,7 +572,7 @@ outro não-chave:
         relação 1:1 explícita.
   \item \texttt{disciplina.quantidade\_alunos} é derivado (contagem de
         matrículas); mantivemos o atributo por exigência do enunciado,
-        documentado no dicionário como derivado — ele não depende de
+        documentado no dicionário como derivado; ele não depende de
         nenhum outro atributo da própria tabela.
 \end{itemize}
 
