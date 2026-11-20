@@ -1,8 +1,7 @@
 % =====================================================================
 %  Projeto 1 - Banco de Dados (Parte 1), Universidade BR
 %  Compilar:
-%    mkdir -p diagramas/build && dot -Tpdf diagramas/conceitual.dot -o diagramas/build/conceitual.pdf
-%    dot -Tpdf diagramas/logico.dot -o diagramas/build/logico.pdf
+%    (diagramas/conceitual.png e diagramas/logico.png exportados do brModelo)
 %    pdflatex projeto-1.tex   (2x)
 % =====================================================================
 \documentclass[12pt,a4paper]{article}
@@ -76,9 +75,9 @@ passando pelas fases:
 
 O projeto deve possuir dicionário de dados e estar na 3FN, e todo o
 material deve ser documentado em PDF. Este documento é essa entrega, e o
-acompanham os arquivos \texttt{modelo-fisico.sql} (script físico),
-\texttt{diagramas/conceitual.dot} e \texttt{diagramas/logico.dot}
-(fontes dos diagramas, em Graphviz).
+acompanham os arquivos \texttt{modelo-fisico.sql} (script físico) e os diagramas em
+\texttt{diagramas/conceitual.png} e \texttt{diagramas/logico.png}
+(gerados no brModelo).
 
 % =====================================================================
 \section{Regras do enunciado e como foram tratadas}
@@ -189,7 +188,7 @@ Decisões de modelagem que merecem destaque:
 \begin{figure}[p]
   \centering
   \includegraphics[width=24.7cm,keepaspectratio]%
-    {diagramas/build/conceitual.pdf}
+    {diagramas/conceitual.png}
   \caption{Modelo conceitual: entidades, atributos e cardinalidades.}
   \label{fig:conceitual}
 \end{figure}
@@ -220,7 +219,7 @@ regras clássicas:
 \begin{figure}[p]
   \centering
   \includegraphics[width=24.7cm,keepaspectratio]%
-    {diagramas/build/logico.pdf}
+    {diagramas/logico.png}
   \caption{Modelo lógico: tipos, chaves primárias e estrangeiras.}
   \label{fig:logico}
 \end{figure}
